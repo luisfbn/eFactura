@@ -1,0 +1,525 @@
+﻿@model SAT.Comprobante
+
+@{
+    <style scoped>
+        .form-group {
+            margin-bottom: 0px !important;
+        }
+    </style>
+}
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post,
+                new
+                {
+                    enctype = "multipart/form-data",
+                    id = "HomeForm",
+                    name = "HomeForm"
+                }))
+{
+    <br />
+    <!-- ko with: home -->
+    <div class="panel panel-primary ">
+        <div class="panel-heading">
+            <h3 class="panel-title">Comprobante XML</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+
+                <div class="col-md-12 ">
+                    <div class="panel panel-default">
+
+                        <div class="panel-body">
+                            Aplicación web para mostrar la información de un archivo XML generado
+                            como comprobante de alguna transacción para el SAT en la versión correspondiente a cfdv32.xsd
+                        </div>
+                        <div class="panel-footer">
+
+                            <div class="row">
+                                <div class="col-md-6 text-right right ">
+
+                                </div>
+                                <div class="col-md-4 text-right right ">
+                                    <input type="file" id="files" name="files" class="btn" />
+
+                                    <span id="validityMessages" style="color: Red;padding-top:20px;margin-top:20px;"></span>
+
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <button type="submit" class="btn btn-primary " form="HomeForm">Procesar</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /ko -->
+}
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="panel @ViewBag.Panel " style="text-transform: capitalize;">
+
+            <div class="panel-heading">
+                <h3 class="panel-title">Archivo: <b>@ViewBag.ArchivoNombre</b></h3>
+            </div>
+
+
+            <div class="panel-body ">
+
+
+
+
+                @if (Model == null)
+                {
+                    <span>
+                        @ViewBag.InvalidoPor
+                    </span>
+                }
+                else
+                {
+
+                    int nProp = 0;
+
+                    int nPropMax = Model.GetType().GetProperties().Count();
+
+                    foreach (var propModel in Model.GetType().GetProperties())
+                    {
+
+
+                        if (propModel.PropertyType.Name.Equals("ComprobanteEmisor"))
+                        {
+                            nProp++;
+                            <div class="col-md-6">
+                                <div class="panel panel-info">
+
+                                    <div class="panel-heading">
+                                        EMISOR
+                                    </div>
+
+                                    @{
+                                        SAT.ComprobanteEmisor emisor = (SAT.ComprobanteEmisor)propModel.GetValue(Model, null);
+                                    }
+
+                                    <ul>
+                                        @if (emisor != null)
+                                        {
+                                            foreach (var propEmisor in emisor.GetType().GetProperties())
+                                            {
+                                                if (propEmisor.Name == "DomicilioFiscal")
+                                                {
+                                                    <br />
+                                                    @Html.Label("Domicilio Fiscal")
+
+                                                    SAT.t_UbicacionFiscal domicilioFiscal = (SAT.t_UbicacionFiscal)propEmisor.GetValue(Model.Emisor, null);
+                                                    if (domicilioFiscal != null)
+                                                    {
+                                                        foreach (var df1 in domicilioFiscal.GetType().GetProperties())
+                                                        {
+                                                            <li>
+                                                                <b>@df1.Name:</b> @df1.GetValue(Model.Emisor.DomicilioFiscal, null)
+                                                            </li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li>[Sin datos]</li>
+                                                    }
+
+                                                }
+                                                else if (propEmisor.Name == "ExpedidoEn")
+                                                {
+                                                    <br />
+                                                    @Html.Label("Domicilio donde se expidió")
+
+                                                    SAT.t_Ubicacion domicilioExpedido = (SAT.t_Ubicacion)propEmisor.GetValue(Model.Emisor, null);
+                                                    if (domicilioExpedido != null)
+                                                    {
+                                                        foreach (var df1 in domicilioExpedido.GetType().GetProperties())
+                                                        {
+                                                            <li>
+                                                                <b>@df1.Name:</b> @df1.GetValue(Model.Emisor.ExpedidoEn, null)
+                                                            </li>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <li>[Sin datos]</li>
+                                                    }
+
+                                                }
+                                                else if (propEmisor.Name == "RegimenFiscal")
+                                                {
+                                                    <br />
+                                                    @Html.Label("RegimenFiscal")
+
+                                                    SAT.ComprobanteEmisorRegimenFiscal[] regimenes = (SAT.ComprobanteEmisorRegimenFiscal[])propEmisor.GetValue(Model.Emisor, null);
+                                                    if (regimenes != null)
+                                                    {
+                                                        foreach (var rs in regimenes)
+                                                        {
+                                                            foreach (var r in rs.GetType().GetProperties())
+                                                            {
+                                                                <li>
+                                                                    @r.GetGetMethod().Invoke(rs, null).ToString()
+                                                                </li>
+                                                            }
+
+
+                                                        }
+                                                    }
+
+
+
+                                                    <br />
+                                                    @Html.Label("Datos")
+                                                }
+
+                                                else
+                                                {
+                                                    <li>
+                                                        <b>@propEmisor.Name:</b> @propEmisor.GetValue(Model.Emisor, null)
+                                                    </li>
+                                                }
+
+
+                                            }
+                                        }
+                                    </ul>
+
+
+
+                                </div>
+                            </div>
+
+
+                                        }
+
+
+
+
+
+                                        else if (propModel.PropertyType.Name.Equals("ComprobanteReceptor"))
+                                        {
+                                            nProp++;
+
+                                            <div class="col-md-5">
+                                                <div class="panel panel-info">
+                                                    <div class="panel-heading">
+                                                        RECEPTOR
+                                                    </div>
+                                                    @{
+                                                        SAT.ComprobanteReceptor receptor = (SAT.ComprobanteReceptor)propModel.GetValue(Model, null);
+                                                    }
+
+
+                                                    <ul>
+                                                        @if (receptor != null)
+                                                        {
+                                                        foreach (var propReceptor in receptor.GetType().GetProperties())
+                                                        {
+
+                                                        if (propReceptor.Name == "Domicilio")
+                                                        {
+                                                        <br />
+                                                        @Html.Label("Domicilio")
+
+                                                        SAT.t_Ubicacion domicilio = (SAT.t_Ubicacion)propReceptor.GetValue(Model.Receptor, null);
+                                                        if (domicilio != null)
+                                                        {
+                                                        foreach (var d1 in domicilio.GetType().GetProperties())
+                                                        {
+                                                        <li>
+                                                            <b>@d1.Name:</b> @d1.GetValue(Model.Receptor.Domicilio, null)
+                                                        </li>
+                                                                        }
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <li>[Sin datos]</li>
+                                                                    }
+
+                                                        <br />
+                                                        @Html.Label("Datos")
+                                                        }
+                                                        else
+                                                        {
+                                                        <li>
+                                                            <b>@propReceptor.Name:</b> @propReceptor.GetValue(Model.Receptor, null)
+                                                        </li>
+                                                        }
+
+
+
+                                                        }
+                                                        }
+
+                                                    </ul>
+
+                                                </div>
+                                            </div>
+
+
+                                                        }
+
+
+
+
+                                                        else if (propModel.PropertyType.Name.Equals("ComprobanteConcepto[]"))
+                                                        {
+
+                                                            nProp++;
+
+                                                            <div class="col-md-11">
+                                                                <div class="panel panel-info">
+                                                                    <div class="panel-heading">
+                                                                        Conceptos
+                                                                    </div>
+
+
+                                                                    @{
+                                                                        SAT.ComprobanteConcepto[] conceptoArray = (SAT.ComprobanteConcepto[])propModel.GetValue(Model, null);
+                                                                        int n = 0;
+                                                                    }
+
+                                                                    <table class="table">
+                                                                        @if (conceptoArray != null)
+                                                                        {
+                                                                            foreach (var cx1 in conceptoArray) //.GetType().GetProperties())
+                                                                            {
+                                                                                if (n == 0)
+                                                                                {
+                                                                                    <tr>
+                                                                                        @foreach (var c2 in cx1.GetType().GetProperties())
+                                                                                        {
+                                                                                            if (n == 0)
+                                                                                            {
+                                                                                                <th>
+                                                                                                    @c2.Name
+                                                                                                </th>
+                                                                                            }
+                                                                                        }
+                                                                                    </tr>
+                                                                                }
+
+                                                                                <tr>
+                                                                                    @foreach (var c2 in cx1.GetType().GetProperties())
+                                                                                    {
+                                                                                        <td>
+                                                                                            @*http://stackoverflow.com/questions/4879197/using-reflection-read-properties-of-an-object-containing-array-of-another-object*@
+                                                                                            @try
+                                                                                            {
+                                                                                                @c2.GetGetMethod().Invoke(cx1, null).ToString();
+                                                                                            }
+                                                                                            catch (Exception ex) { string.Concat("Error: ", ex.Message.ToString()); }
+                                                                                        </td>
+
+                                                                                    }
+                                                                                    @{ n++;
+                                                                                    }
+                                                                                </tr>
+                                                                                            }
+                                                                                        }
+                                                                    </table>
+
+                                                                </div>
+                                                            </div>
+                                                                                        }
+
+                                                                                        else if (propModel.PropertyType.Name.Equals("ComprobanteComplemento"))
+                                                                                        {
+                                                                                            nProp++;
+
+                                                                                            <div class="col-md-11">
+                                                                                                <div class="panel panel-info" style="white-space:nowrap;overflow: hidden;text-overflow: ellipsis;">
+                                                                                                    <div class="panel-heading">
+                                                                                                        Complemento
+                                                                                                    </div>
+                                                                                                    <div class="panel-body">
+
+                                                                                                        @{
+                                                                                                            SAT.ComprobanteComplemento complemento = (SAT.ComprobanteComplemento)propModel.GetValue(Model, null);
+                                                                                                        }
+
+                                                                                                        @if (complemento != null)
+                                                                                                        {
+                                                                                                            foreach (var com in complemento.GetType().GetProperties())
+                                                                                                            {
+
+                                                                                                                if (com.PropertyType.Name.Equals("TimbreFiscalDigital"))
+                                                                                                                {
+
+                                                                                                                    SAT.TimbreFiscalDigital timbre = (SAT.TimbreFiscalDigital)com.GetValue(Model.Complemento, null);
+
+                                                                                                                    if (timbre != null)
+                                                                                                                    {
+                                                                                                                        foreach (var tim in timbre.GetType().GetProperties())
+                                                                                                                        {
+                                                                                                                            <li>
+                                                                                                                                <b>@tim.Name:</b> @tim.GetValue(Model.Complemento.TimbreFiscalDigital, null)
+                                                                                                                            </li>
+                                                                                                                        }
+                                                                                                                    }
+
+                                                                                                                }
+                                                                                                                else
+                                                                                                                {
+                                                                                                                    <li>
+                                                                                                                        <b>@com.Name:</b> @com.GetValue(Model.Complemento, null)
+                                                                                                                    </li>
+                                                                                                                }
+
+
+                                                                                                            }
+                                                                                                        }
+
+
+
+
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                                            }
+                                                                                                            else if (propModel.PropertyType.Name.Equals("ComprobanteAddenda"))
+                                                                                                            {
+                                                                                                                nProp++;
+
+                                                                                                                <div class="col-md-11">
+                                                                                                                    <div class="panel panel-info">
+                                                                                                                        <div class="panel-heading">
+                                                                                                                            Addenda
+                                                                                                                        </div>
+                                                                                                                        <div class="panel-body" style='text-overflow: ellipsis;width:100%'>
+
+
+
+
+                                                                                                                            @{
+                                                                                                                                SAT.ComprobanteAddenda addenda = (SAT.ComprobanteAddenda)propModel.GetValue(Model, null);
+                                                                                                                            }
+                                                                                                                            @if (addenda != null)
+                                                                                                                            {
+
+                                                                                                                                System.Xml.XmlElement[] any = (System.Xml.XmlElement[])addenda.Any;
+
+                                                                                                                                if (any != null)
+                                                                                                                                {
+                                                                                                                                    foreach (var ani in any)
+                                                                                                                                    {
+
+
+
+                                                                                                                                        @Html.TextArea("txtAddenda", @ani.OuterXml, new { @class = "form-control", @style = "max-width:100%; !important", @rows = 5 })
+
+
+
+                                                                                                                                        @*System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+                                                                                                                                            doc.LoadXml(ani.OuterXml);
+
+                                                                                                                                            System.Xml.XmlElement elem = (System.Xml.XmlElement)doc.DocumentElement;
+
+
+
+                                                                                                                                                <li>
+                                                                                                                                                     @elem.Prefix, @elem.LocalName, @elem.InnerText
+
+                                                                                                                                                </li>*@
+
+                                                                                                                                        @*foreach (var c2 in ani.GetType().GetProperties())
+                                                                                                                                                        {
+
+                                                                                                                                                            try
+                                                                                                                                                            {
+                                                                                                                                                                <li>
+                                                                                                                                                                    @c2.Name:
+                                                                                                                                                                    @c2.GetValue(ani, null):
+                                                                                                                                                                    @c2.GetGetMethod().Invoke(ani, null).ToString();
+                                                                                                                                                            </li>
+                                                                                                                                                        }
+                                                                                                                                                        catch (Exception ex) { string.Concat("Error: ", ex.Message.ToString()); }
+
+                                                                                                                                            }*@
+
+                                                                                                                                    }
+                                                                                                                                }
+
+
+
+
+                                                                                                                            }
+
+
+
+
+
+
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                                                }
+
+
+                                                                                                                                else
+                                                                                                                                {
+                                                                                                                                    nProp++;
+
+
+                                                                                                                                    if (nProp == 7)
+                                                                                                                                    {
+                                                                                                                                        @Html.Raw("<div class='col-md-11'><div class='panel panel-info' style='white-space:nowrap;overflow: hidden;text-overflow: ellipsis;' ><div class='panel-heading'>Datos</div>")
+
+                                                                                                                                        <form class="form-horizontal">
+                                                                                                                                            <div class="form-group">
+                                                                                                                                                <label class="col-sm-3 control-label"><b>@propModel.Name:</b></label>
+                                                                                                                                                <div class="col-sm-9">
+                                                                                                                                                    <label type="text" class="form-control">@propModel.GetValue(Model, null)</label>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
+
+                                                                                                                                        </form>
+
+                                                                                                                                    }
+
+                                                                                                                                    else if (nProp >= 7)
+                                                                                                                                    {
+                                                                                                                                        <form class="form-horizontal">
+                                                                                                                                            <div class="form-group">
+                                                                                                                                                <label class="col-sm-3 control-label"><b>@propModel.Name:</b></label>
+                                                                                                                                                <div class="col-sm-9">
+                                                                                                                                                    <label type="text" class="form-control">@propModel.GetValue(Model, null)</label>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
+
+                                                                                                                                        </form>
+                                                                                                                                    }
+                                                                                                                                    else if (nProp == nPropMax)
+                                                                                                                                    {
+                                                                                                                                        @Html.Raw("</div></div></div>")
+                                                                                                                                            }
+
+
+
+
+                                                                                                                                        }
+
+
+                                                                                                                                    }
+
+
+
+                                                                                                                                }
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
